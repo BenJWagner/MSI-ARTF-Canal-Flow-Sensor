@@ -141,6 +141,8 @@ void setup()
   //pinMode(echoPin, INPUT);
   //PinMode settings for Maxbotix ultrasonic sensor.
   pinMode(US_PIN, OUTPUT);
+  //GSM Power pin output
+  pinMode(FONA_RST, OUTPUT);
 }
 
 
@@ -265,7 +267,10 @@ void loop()
   //DateTime unixTime = now.unixTime();
   DateTime   unixTime = rtc.now(); ///////////////Jalal Changes//////////////// it is rtc.now(); not now.unixTime();
 
-
+// 12b. Get battery voltage and percentage
+        uint16_t vbat;
+        fona.getBattVoltage(&vbat);
+        
 
   // 13. Combine time, distance, and temperature into a single string.
   // ----------------------------------------------------------------- i = std::stoi(line);
@@ -302,6 +307,7 @@ void loop()
     // 18. Prepare text message
     // ---------------------
     String textMessage = String(SENSOR_NUM) + " " +
+    String(vbat) + " " +
    //                      String(sensorReadings[0].timestamp) + " " +
    String(unixTime.unixtime()) + " " +
    //                      String(sensorReadings[0].distance) + " " +
@@ -319,14 +325,11 @@ void loop()
     //  textMessage += String(DATA_DELIM) + String(minutesElapsed) + " " + String(sensorReadings[i].distance) + " " + String(sensorReadings[i].temperature);
    // }
 
-    // Turn on GSM
-  //  digitalWrite(GSM_PIN, HIGH);
-  //  delay(1500);
-
-
-    // SIM800H appears to auto detect baud rate, but Adafruit example uses 115200. Start communication link with GSM.
-   // Serial.begin(115200);
-   // delay(100);
+  // Turn on GSM. Pulse the KEY pin with digital pin 4 for 2 seconds. 
+  digitalWrite(FONA_RST, HIGH);
+  delay(2000);
+  digitalWrite(FONA_RST, LOW);
+  delay(2000);
 
 
     // 20. Send text message if GSM Ready
@@ -407,13 +410,11 @@ fona.sendSMS(PHONE_NUMBER, message);
    // numCachedReadings = 0;
 
 
-    // 20. Turn off GSM.
-    // -----------------
-
-
-    // Turn off GSM.
-   // digitalWrite(GSM_PIN, LOW);
-   // delay(2000);
+  // 20. Turn off GSM.
+  digitalWrite(FONA_RST, HIGH);
+  delay(2000);
+  digitalWrite(FONA_RST, LOW);
+  delay(2000);
 //  }
 }
 // File myFile;
