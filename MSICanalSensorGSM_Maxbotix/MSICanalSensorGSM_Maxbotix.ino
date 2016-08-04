@@ -38,7 +38,7 @@
 #define FONA_TX 8
 #define FONA_RST 4
 #define FONA_RI 7
-
+#define FONA_PWR 11
 // this is a large buffer for replies
 char replybuffer[255];
 
@@ -64,7 +64,7 @@ char replybuffer[255];
 //Number of readings per text message.
 #define SEND_DATA_AFTER_X_READINGS 1
 //Each sleep cycle is approximately 8 seconds.
-#define SLEEP_CYCLES               450
+#define SLEEP_CYCLES               2
 //Number of thermistor readings to be averaged.
 #define NUM_THERM_READINGS         5
 //Delay in miliseconds between temperature readings.
@@ -115,7 +115,11 @@ void setup()
 {
 
   while (!Serial);
-
+  //Turn on GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
   Serial.begin(115200);
   Serial.println(F("FONA SMS caller ID test"));
   Serial.println(F("Initializing....(May take 3 seconds)"));
@@ -141,8 +145,12 @@ void setup()
   //pinMode(echoPin, INPUT);
   //PinMode settings for Maxbotix ultrasonic sensor.
   pinMode(US_PIN, OUTPUT);
-  //GSM Power pin output
   pinMode(FONA_RST, OUTPUT);
+  //Turn off GSM.
+   digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
 }
 
 
@@ -326,9 +334,9 @@ void loop()
    // }
 
   // Turn on GSM. Pulse the KEY pin with digital pin 4 for 2 seconds. 
-  digitalWrite(FONA_RST, HIGH);
+  digitalWrite(FONA_PWR, HIGH);
   delay(2000);
-  digitalWrite(FONA_RST, LOW);
+  digitalWrite(FONA_PWR, LOW);
   delay(2000);
 
 
@@ -411,9 +419,9 @@ fona.sendSMS(PHONE_NUMBER, message);
 
 
   // 20. Turn off GSM.
-  digitalWrite(FONA_RST, HIGH);
+   digitalWrite(FONA_PWR, HIGH);
   delay(2000);
-  digitalWrite(FONA_RST, LOW);
+  digitalWrite(FONA_PWR, LOW);
   delay(2000);
 //  }
 }
