@@ -278,7 +278,9 @@ void loop()
   //DateTime unixTime = now.unixTime();
   DateTime   unixTime = rtc.now(); ///////////////Jalal Changes//////////////// it is rtc.now(); not now.unixTime();
 
-
+// 12b. Get battery voltage and percentage
+        uint16_t vbat;
+        fona.getBattVoltage(&vbat);
 
   // 13. Combine time, distance, and temperature into a single string.
   // ----------------------------------------------------------------- i = std::stoi(line);
@@ -318,6 +320,7 @@ void loop()
     // 18. Prepare text message
     // ---------------------
     String textMessage = String(SENSOR_NUM) + " " +
+    String(vbat) + " " +
    //                      String(sensorReadings[0].timestamp) + " " +
    String(unixTime.unixtime()) + " " +
    //                      String(sensorReadings[0].distance) + " " +
