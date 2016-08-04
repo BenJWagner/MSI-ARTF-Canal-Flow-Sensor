@@ -38,6 +38,7 @@ int cm;
 #define FONA_TX 8
 #define FONA_RST 4
 #define FONA_RI 7
+#define FONA_PWR 10
 
 // this is a large buffer for replies
 char replybuffer[255];
@@ -116,7 +117,12 @@ RTC_PCF8523 rtc;
 
 void setup()
 {
-
+ //Turn on GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
+  
   while (!Serial);
 
   Serial.begin(115200);
@@ -143,9 +149,12 @@ void setup()
   // PinMode settings for HC-SR04 ultrasonic sensor. Block these if using Maxbotix US sensor.
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  //Serial connection for GSM.
-  //  sim800.begin(&Serial);
 
+ //Turn off GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
 }
 
 
@@ -326,14 +335,13 @@ void loop()
     //  textMessage += String(DATA_DELIM) + String(minutesElapsed) + " " + String(sensorReadings[i].distance) + " " + String(sensorReadings[i].temperature);
    // }
 
-    // Turn on GSM
-  //  digitalWrite(GSM_PIN, HIGH);
-  //  delay(1500);
+ //Turn on GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
 
 
-    // SIM800H appears to auto detect baud rate, but Adafruit example uses 115200. Start communication link with GSM.
-   // Serial.begin(115200);
-   // delay(100);
 
 
     // 20. Send text message if GSM Ready
@@ -417,10 +425,11 @@ fona.sendSMS(PHONE_NUMBER, message);
     // 20. Turn off GSM.
     // -----------------
 
-
-    // Turn off GSM.
-   // digitalWrite(GSM_PIN, LOW);
-   // delay(2000);
+ //Turn off GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(2000);
 //  }
 }
 // File myFile;
