@@ -5,6 +5,7 @@
   Sketch used by MSI Sensors platform.
 
   Created 04JUL16
+  Modified 04AUG16
 */
 
 #include <LowPower.h>
@@ -38,7 +39,7 @@ int cm;
 #define FONA_TX 8
 #define FONA_RST 4
 #define FONA_RI 7
-#define FONA_PWR 10
+#define FONA_PWR 11
 
 // this is a large buffer for replies
 char replybuffer[255];
@@ -65,7 +66,7 @@ char replybuffer[255];
 //Number of readings per text message.
 #define SEND_DATA_AFTER_X_READINGS 1
 //Each sleep cycle is approximately 8 seconds.
-#define SLEEP_CYCLES               450
+#define SLEEP_CYCLES               2
 //Number of thermistor readings to be averaged.
 #define NUM_THERM_READINGS         5
 //Delay in miliseconds between temperature readings.
@@ -117,7 +118,9 @@ RTC_PCF8523 rtc;
 
 void setup()
 {
+  pinMode(FONA_PWR, OUTPUT);
  //Turn on GSM.
+  digitalWrite(FONA_PWR, LOW);
   digitalWrite(FONA_PWR, HIGH);
   delay(2000);
   digitalWrite(FONA_PWR, LOW);
@@ -138,7 +141,7 @@ void setup()
 
   char message[121] = "GSM Testing!";
   
-  if (!fona.sendSMS(PHONE_NUMBER, message)) { ///////////new changes ////////////// checks if message sent,
+  if (!fona.sendSMS(PHONE_NUMBER, message)) { 
      Serial.println(F("SMS Sent"));
   } else {Serial.println(F("SMS Not Sent"));}
 
@@ -170,10 +173,10 @@ void loop()
  //  Serial.println(F("Sleep cycle loop."));
 //   Serial.println(i); 
 //  This is the function for power down.
-//  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
 //  This is the function for 32u4 idle. 
-    LowPower.idle(SLEEP_8S, ADC_OFF, TIMER4_OFF, TIMER3_OFF, TIMER1_OFF, 
-                  TIMER0_OFF, SPI_OFF, USART1_OFF, TWI_OFF, USB_OFF);
+//    LowPower.idle(SLEEP_8S, ADC_OFF, TIMER4_OFF, TIMER3_OFF, TIMER1_OFF, 
+  //                TIMER0_OFF, SPI_OFF, USART1_OFF, TWI_OFF, USB_OFF);
   }
 
   // 2. Turn on thermistor.
