@@ -64,7 +64,7 @@ char replybuffer[255];
 //Number of readings per text message.
 #define SEND_DATA_AFTER_X_READINGS 1
 //Each sleep cycle is approximately 8 seconds.
-#define SLEEP_CYCLES               2
+#define SLEEP_CYCLES               450
 //Number of thermistor readings to be averaged.
 #define NUM_THERM_READINGS         5
 //Delay in miliseconds between temperature readings.
@@ -80,7 +80,7 @@ char replybuffer[255];
 #define ERROR_FILENAME             "error.txt"
 // Google Voice phone number for msi.artf2@gmail.com
 //#define PHONE_NUMBER               "+13027152285"
-//char PHONE_NUMBER[21] = "+19072236094";////////////////////////////////new changes/////////////// phone number changed to char array since fona library dosen't support phone as as string
+//char PHONE_NUMBER[21] = "+19072236094";
 char PHONE_NUMBER[21] = "+13027152285"; // GoogleVoice for msi.artf2@gmail.com
 #define ERROR_GSM                  "GSM Failed"
 #define ERROR_SMS                  "SMS Failed"
@@ -113,29 +113,6 @@ RTC_PCF8523 rtc;
 
 void setup()
 {
-
-  while (!Serial);
-  //Turn on GSM.
-  digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
-  Serial.begin(115200);
-  Serial.println(F("FONA SMS caller ID test"));
-  Serial.println(F("Initializing....(May take 3 seconds)"));
-
-  fonaSerial->begin(4800);
-  if (! fona.begin(*fonaSerial)) {
-    Serial.println(F("Couldn't find FONA"));
-    while (1);
-  }
-  Serial.println(F("FONA is OK"));
-
-  char message[121] = "GSM Testing!";
-  
-  if (!fona.sendSMS(PHONE_NUMBER, message)) { ///////////new changes ////////////// checks if message sent,
-     Serial.println(F("SMS Sent"));
-  } else {Serial.println(F("SMS Not Sent"));}
   // SC card CS pin defined.
   pinMode(SD_CS_PIN, OUTPUT);
   //Thermistor pin defined.
@@ -146,11 +123,43 @@ void setup()
   //PinMode settings for Maxbotix ultrasonic sensor.
   pinMode(US_PIN, OUTPUT);
   pinMode(FONA_RST, OUTPUT);
-  //Turn off GSM.
-   digitalWrite(FONA_PWR, HIGH);
+  pinMode(FONA_PWR, OUTPUT);
+ 
+  //Turn on GSM.
+  digitalWrite(FONA_PWR, HIGH);
   delay(2000);
   digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  delay(15000);
+  
+  while (!Serial);
+ 
+  Serial.begin(115200);
+  Serial.println(F("FONA SMS caller ID test"));
+  Serial.println(F("Initializing....(May take 3 seconds)"));
+
+  fonaSerial->begin(4800);
+  if (! fona.begin(*fonaSerial)) {
+    Serial.println(F("Couldn't find FONA"));
+    while (1);
+   }
+  Serial.println(F("FONA is OK"));
+
+    char message[121] = "GSM Testing!";
+  
+    if (!fona.sendSMS(PHONE_NUMBER, message)) { ///////////new changes ////////////// checks if message sent,
+    Serial.println(F("Failed"));
+    } else {
+    Serial.println(F("Sent"));
+    }
+
+
+  //Turn off GSM.
+  //delay(1000);
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(2000);
+
 }
 
 
@@ -224,7 +233,7 @@ void loop()
   //At room temperature, sound velocity is approximately 29 cm/ms. Divide by 2 to account for return time.
   //Doing this to simplify sketch and do temperature augmentation for either US sensor with same code.
   //Only one reading with method.
-  delay(3000);
+  delay(1000);
 
   //Maxbotix US sensor. Block if using HC-SR04. 
   //Using Maxbotix pin 4 to trigger power to US. LOW = off, HIGH = on.
@@ -277,7 +286,7 @@ void loop()
 
 // 12b. Get battery voltage and percentage
         uint16_t vbat;
-        fona.getBattVoltage(&vbat);
+        fona.getBattPercent(&vbat);
         
 
   // 13. Combine time, distance, and temperature into a single string.
@@ -328,16 +337,19 @@ void loop()
 
     // Format data to send as text message
   //  for (int i = 1; i < numCachedReadings; ++i)
-    {
+    //{
       //      minutesElapsed = (sensorReadings[i].timestamp - startTime) / 60;
     //  textMessage += String(DATA_DELIM) + String(minutesElapsed) + " " + String(sensorReadings[i].distance) + " " + String(sensorReadings[i].temperature);
    // }
 
   // Turn on GSM. Pulse the KEY pin with digital pin 4 for 2 seconds. 
-  digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  //delay(1000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(200);
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(2000);
 
 
     // 20. Send text message if GSM Ready
@@ -375,8 +387,8 @@ void loop()
         strncpy(message, textMessage.c_str(), sizeof(message));
         message[sizeof(message) - 1] = 0;
 
-//Serial.println(message);
-fona.sendSMS(PHONE_NUMBER, message);
+  //Serial.println(message);
+  fona.sendSMS(PHONE_NUMBER, message);
      //   if (!fona.sendSMS(PHONE_NUMBER, message)) { ///////////new changes ////////////// checks if message sent,
     //      SD.begin();
      //     writeToSDCard(BACKUP_FILENAME, textMessage);
@@ -419,10 +431,13 @@ fona.sendSMS(PHONE_NUMBER, message);
 
 
   // 20. Turn off GSM.
-   digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  //delay(1000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(200);
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(2000);
 //  }
 }
 // File myFile;
@@ -445,7 +460,7 @@ fona.sendSMS(PHONE_NUMBER, message);
  //   Serial.println("error opening backup.txt");
  // }
 
-}
+//}
 
 
 

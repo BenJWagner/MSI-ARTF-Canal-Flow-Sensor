@@ -10,11 +10,8 @@
 
 #include <LowPower.h>
 #include <math.h>
-
-#include <Time.h>  /////////////Jalal Changes////////////////Beside RTCLib there must also by Time library. It includes time_t type where we can store the unix datetime type
-
-#include <Adafruit_FONA.h> /////////////////new Changes/////////////// include fona
-
+#include <Time.h>  
+#include <Adafruit_FONA.h> 
 //#include "Sim800.h"
 #include <SD.h>
 #include <SPI.h>
@@ -66,7 +63,7 @@ char replybuffer[255];
 //Number of readings per text message.
 #define SEND_DATA_AFTER_X_READINGS 1
 //Each sleep cycle is approximately 8 seconds.
-#define SLEEP_CYCLES               2
+#define SLEEP_CYCLES               450
 //Number of thermistor readings to be averaged.
 #define NUM_THERM_READINGS         5
 //Delay in miliseconds between temperature readings.
@@ -118,13 +115,19 @@ RTC_PCF8523 rtc;
 
 void setup()
 {
+  // SC card CS pin defined.
+  pinMode(SD_CS_PIN, OUTPUT);
+  //Thermistor pin defined.
+  pinMode(THERM_PIN, OUTPUT);
+  // PinMode settings for HC-SR04 ultrasonic sensor. Block these if using Maxbotix US sensor.
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   pinMode(FONA_PWR, OUTPUT);
- //Turn on GSM.
-  digitalWrite(FONA_PWR, LOW);
+   //Turn on GSM.
   digitalWrite(FONA_PWR, HIGH);
   delay(2000);
   digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  delay(15000);
   
   while (!Serial);
 
@@ -143,21 +146,15 @@ void setup()
   
   if (!fona.sendSMS(PHONE_NUMBER, message)) { 
      Serial.println(F("SMS Sent"));
-  } else {Serial.println(F("SMS Not Sent"));}
-
-  // SC card CS pin defined.
-  pinMode(SD_CS_PIN, OUTPUT);
-  //Thermistor pin defined.
-  pinMode(THERM_PIN, OUTPUT);
-  // PinMode settings for HC-SR04 ultrasonic sensor. Block these if using Maxbotix US sensor.
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  } else {Serial.println(F("SMS Not Sent"));
+  }
+  
 
  //Turn off GSM.
-  digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(2000);
 }
 
 
@@ -283,7 +280,7 @@ void loop()
 
 // 12b. Get battery voltage and percentage
         uint16_t vbat;
-        fona.getBattVoltage(&vbat);
+        fona.getBattPercent(&vbat);
 
   // 13. Combine time, distance, and temperature into a single string.
   // ----------------------------------------------------------------- i = std::stoi(line);
@@ -342,10 +339,10 @@ void loop()
    // }
 
  //Turn on GSM.
-  digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(15000);
 
 
 
@@ -432,10 +429,10 @@ fona.sendSMS(PHONE_NUMBER, message);
     // -----------------
 
  //Turn off GSM.
-  digitalWrite(FONA_PWR, HIGH);
-  delay(2000);
-  digitalWrite(FONA_PWR, LOW);
-  delay(2000);
+ // digitalWrite(FONA_PWR, HIGH);
+ // delay(2000);
+ // digitalWrite(FONA_PWR, LOW);
+ // delay(2000);
 //  }
 }
 // File myFile;
