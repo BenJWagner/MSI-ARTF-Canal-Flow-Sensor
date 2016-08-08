@@ -5,15 +5,13 @@
   Sketch used by MSI Sensors platform.
 
   Created 04JUL16
+  Modified 04AUG16
 */
 
 #include <LowPower.h>
 #include <math.h>
-
-#include <Time.h>  /////////////Jalal Changes////////////////Beside RTCLib there must also by Time library. It includes time_t type where we can store the unix datetime type
-
-#include <Adafruit_FONA.h> /////////////////new Changes/////////////// include fona
-
+#include <Time.h>  
+#include <Adafruit_FONA.h> 
 //#include "Sim800.h"
 #include <SD.h>
 #include <SPI.h>
@@ -38,6 +36,7 @@ int cm;
 #define FONA_TX 8
 #define FONA_RST 4
 #define FONA_RI 7
+#define FONA_PWR 11
 
 // this is a large buffer for replies
 char replybuffer[255];
@@ -116,7 +115,20 @@ RTC_PCF8523 rtc;
 
 void setup()
 {
-
+  // SC card CS pin defined.
+  pinMode(SD_CS_PIN, OUTPUT);
+  //Thermistor pin defined.
+  pinMode(THERM_PIN, OUTPUT);
+  // PinMode settings for HC-SR04 ultrasonic sensor. Block these if using Maxbotix US sensor.
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(FONA_PWR, OUTPUT);
+   //Turn on GSM.
+  digitalWrite(FONA_PWR, HIGH);
+  delay(2000);
+  digitalWrite(FONA_PWR, LOW);
+  delay(15000);
+  
   while (!Serial);
 
   Serial.begin(115200);
@@ -132,20 +144,17 @@ void setup()
 
   char message[121] = "GSM Testing!";
   
-  if (!fona.sendSMS(PHONE_NUMBER, message)) { ///////////new changes ////////////// checks if message sent,
+  if (!fona.sendSMS(PHONE_NUMBER, message)) { 
      Serial.println(F("SMS Sent"));
-  } else {Serial.println(F("SMS Not Sent"));}
+  } else {Serial.println(F("SMS Not Sent"));
+  }
+  
 
-  // SC card CS pin defined.
-  pinMode(SD_CS_PIN, OUTPUT);
-  //Thermistor pin defined.
-  pinMode(THERM_PIN, OUTPUT);
-  // PinMode settings for HC-SR04 ultrasonic sensor. Block these if using Maxbotix US sensor.
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  //Serial connection for GSM.
-  //  sim800.begin(&Serial);
-
+ //Turn off GSM.
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(2000);
 }
 
 
@@ -161,10 +170,10 @@ void loop()
  //  Serial.println(F("Sleep cycle loop."));
 //   Serial.println(i); 
 //  This is the function for power down.
-//  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
 //  This is the function for 32u4 idle. 
-    LowPower.idle(SLEEP_8S, ADC_OFF, TIMER4_OFF, TIMER3_OFF, TIMER1_OFF, 
-                  TIMER0_OFF, SPI_OFF, USART1_OFF, TWI_OFF, USB_OFF);
+//    LowPower.idle(SLEEP_8S, ADC_OFF, TIMER4_OFF, TIMER3_OFF, TIMER1_OFF, 
+  //                TIMER0_OFF, SPI_OFF, USART1_OFF, TWI_OFF, USB_OFF);
   }
 
   // 2. Turn on thermistor.
@@ -269,7 +278,9 @@ void loop()
   //DateTime unixTime = now.unixTime();
   DateTime   unixTime = rtc.now(); ///////////////Jalal Changes//////////////// it is rtc.now(); not now.unixTime();
 
-
+// 12b. Get battery voltage and percentage
+        uint16_t vbat;
+        fona.getBattPercent(&vbat);
 
   // 13. Combine time, distance, and temperature into a single string.
   // ----------------------------------------------------------------- i = std::stoi(line);
@@ -309,6 +320,7 @@ void loop()
     // 18. Prepare text message
     // ---------------------
     String textMessage = String(SENSOR_NUM) + " " +
+    String(vbat) + " " +
    //                      String(sensorReadings[0].timestamp) + " " +
    String(unixTime.unixtime()) + " " +
    //                      String(sensorReadings[0].distance) + " " +
@@ -326,14 +338,13 @@ void loop()
     //  textMessage += String(DATA_DELIM) + String(minutesElapsed) + " " + String(sensorReadings[i].distance) + " " + String(sensorReadings[i].temperature);
    // }
 
-    // Turn on GSM
-  //  digitalWrite(GSM_PIN, HIGH);
-  //  delay(1500);
+ //Turn on GSM.
+  //digitalWrite(FONA_PWR, HIGH);
+  //delay(2000);
+  //digitalWrite(FONA_PWR, LOW);
+  //delay(15000);
 
 
-    // SIM800H appears to auto detect baud rate, but Adafruit example uses 115200. Start communication link with GSM.
-   // Serial.begin(115200);
-   // delay(100);
 
 
     // 20. Send text message if GSM Ready
@@ -417,10 +428,11 @@ fona.sendSMS(PHONE_NUMBER, message);
     // 20. Turn off GSM.
     // -----------------
 
-
-    // Turn off GSM.
-   // digitalWrite(GSM_PIN, LOW);
-   // delay(2000);
+ //Turn off GSM.
+ // digitalWrite(FONA_PWR, HIGH);
+ // delay(2000);
+ // digitalWrite(FONA_PWR, LOW);
+ // delay(2000);
 //  }
 }
 // File myFile;
